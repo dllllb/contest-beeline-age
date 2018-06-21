@@ -11,12 +11,11 @@ from sklearn.preprocessing.imputation import Imputer
 import ds_tools.dstools.ml.transformers as tr
 import ds_tools.dstools.ml.xgboost_tools as xgb
 
-import json
-import os.path
-import time
-
 
 def update_model_stats(stats_file, params, results):
+    import json
+    import os.path
+    
     if os.path.exists(stats_file):
         with open(stats_file, 'r') as f:
             stats = json.load(f)
@@ -30,6 +29,8 @@ def update_model_stats(stats_file, params, results):
 
         
 def run_experiment(evaluator, params, stats_file):
+    import time
+    
     start = time.time()
     scores = evaluator(params)
     exec_time = time.time() - start
