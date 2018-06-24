@@ -156,23 +156,29 @@ def validate(params):
             Imputer(strategy='median'),
         )
     
-    xgb_params = {
+    keys = {
+        'eta',
+        'num_rounds',
+        'max_depth',
+        'min_child_weight',
+        'gamma',
+        'subsample',
+        'colsample_bytree'
+    }
+    
+    xgb_params = {k: v for k, v in params.items() if k in keys}
+    
+    xgb_params_all = {
         "objective": "multi:softprob",
         "num_class": 7,
-        "eta": params['eta'],
-        "num_rounds": params['num_rounds'],
-        "max_depth": params['max_depth'],
-        "min_child_weight": params['min_child_weight'],
-        "gamma": params['gamma'],
-        "subsample": params['subsample'],
-        "colsample_bytree": params['colsample_bytree'],
         "scale_pos_weight": 1,
         "silent": 0,
         "verbose": 10,
         "eval_func": eval_accuracy,
+        **xgb_params,
     }
     
-    est = make_pipeline(transf, xgb.XGBoostClassifier(**xgb_params))
+    est = make_pipeline(transf, xgb.XGBoostClassifier(**xgb_params_all))
     return cv_test(est, n_folds=params['n_folds'], n_rows=params.get('n_rows'))
 
 
@@ -185,7 +191,6 @@ def test_validate():
         "subsample": 0.7,
         "colsample_bytree": 0.7,
         "category_encoding": "empytical_bayes",
-        #'n_rows': 500,
         'num_rounds': 10,
         'n_fodls': 3
     }
