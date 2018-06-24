@@ -28,7 +28,7 @@ def update_model_stats(stats_file, params, results):
         json.dump(stats, f, indent=4)
 
         
-def run_experiment(evaluator, params, stats_file):
+def run_experiment(evaluator, params, stats_file):    
     import time
     
     start = time.time()
@@ -36,9 +36,18 @@ def run_experiment(evaluator, params, stats_file):
     exec_time = time.time() - start
     update_model_stats(stats_file, params, {**scores, 'exec-time-sec': exec_time})
 
+    
+def init_params(overrides):
+    defaults = {
+        'validation-type': 'cv',
+        'n_folds': 8,
+        'num_rounds': 10000,
+    }
+    return {**defaults, **overrides}
 
-def cv_test(est, n_folds):
-    df = pd.read_csv('train.csv.gz')
+
+def cv_test(est, n_folds, n_rows=None):
+    df = pd.read_csv('train.csv.gz', nrows=n_rows)
 
     features = df.drop('y', axis=1)
     target = df.y
@@ -92,14 +101,9 @@ def hyperopt():
         'max_depth': hpo.hp.quniform('max_depth', 5, 20, 1),
         'min_child_weight': hpo.hp.quniform('min_child_weight', 1, 20, 1),
         'gamma': hpo.hp.quniform('gamma', 0, 10, 1),
-        "objective": "multi:softprob",
-        "num_class": 7,
         "eta": 0.001,
-        "num_rounds": 10000,
         "subsample": 0.7,
         "colsample_bytree": 0.7,
-        "scale_pos_weight": 1,
-        "silent": 2,
         'validation-type': 'cv',
         'n_folds': 8,
         'category_encoding': 'onehot',
@@ -118,6 +122,8 @@ def eval_accuracy(preds, dtrain):
 
 
 def validate(params):
+    params = init_params(params)
+    
     category_encoding = params['category_encoding']
     
     if category_encoding == 'onehot':
@@ -140,7 +146,7 @@ def validate(params):
         )
     elif category_encoding == 'empytical_bayes':
         transf = make_pipeline(
-            tr.empyrical_bayes_encoder(),
+            tr.empirical_bayes_encoder(),
             Imputer(strategy='median'),
         )
     elif category_encoding == 'target_share':
@@ -154,7 +160,7 @@ def validate(params):
         "objective": "multi:softprob",
         "num_class": 7,
         "eta": params['eta'],
-        "num_rounds": 10000,
+        "num_rounds": params['num_rounds'],
         "max_depth": params['max_depth'],
         "min_child_weight": params['min_child_weight'],
         "gamma": params['gamma'],
@@ -167,4 +173,20 @@ def validate(params):
     }
     
     est = make_pipeline(transf, xgb.XGBoostClassifier(**xgb_params))
-    return cv_test(est, n_folds=params['n_folds'])
+    return cv_test(est, n_folds=params['n_folds'], n_rows=params.get('n_rows'))
+
+
+def test_validate():
+    params = {
+        "eta": 0.1,
+        "max_depth": 9,
+        "min_child_weight": 6,
+        "gamma": 0,
+        "subsample": 0.7,
+        "colsample_bytree": 0.7,
+        "category_encoding": "empytical_bayes",
+        #'n_rows': 500,
+        'num_rounds': 10,
+        'n_fodls': 3
+    }
+    print(validate(params))
