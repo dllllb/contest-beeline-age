@@ -82,14 +82,15 @@ def submission(est):
     res_df.to_csv('results.csv', index_label='ID')
     
 def hyperparam_objective(params):
+    params['max_depth'] = int(params['max_depth'])
     return validate(params)['ROC-AUC-mean']
     
 def hyperopt():
     import hyperopt as hpo
 
     space = {
-        'max_depth': hpo.hp.choice('max_depth', np.arange(5, 20, 1, dtype=int)),
-        'min_child_weight': hpo.hp.choice('min_child_weight', np.arange(1, 20, 1, dtype=int)),
+        'max_depth': hpo.hp.quniform('max_depth', 5, 20, 1),
+        'min_child_weight': hpo.hp.quniform('min_child_weight', 1, 20, 1),
         'gamma': hpo.hp.quniform('gamma', 0, 10, 1),
         "objective": "multi:softprob",
         "num_class": 7,
