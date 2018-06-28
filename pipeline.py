@@ -123,7 +123,7 @@ def eval_accuracy(preds, dtrain):
     return 'accuracy', -res
 
 
-def init_xbg_est(params):
+def init_xgb_est(params):
     keys = {
         'eta',
         'num_rounds',
@@ -180,7 +180,7 @@ def validate(params):
             Imputer(strategy='median'),
         )
     
-    est = make_pipeline(transf, init_xbg_est(params))
+    est = make_pipeline(transf, init_xgb_est(params))
     return cv_test(est, n_folds=params['n_folds'])
 
 
