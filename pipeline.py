@@ -47,8 +47,8 @@ def init_params(overrides):
     return {**defaults, **overrides}
 
 
-def cv_test(est, n_folds, n_rows=None):
-    df = pd.read_csv('train.csv.gz', nrows=n_rows)
+def cv_test(est, n_folds):
+    df = pd.read_csv('train.csv.gz')
 
     features = df.drop('y', axis=1)
     target = df.y
@@ -181,7 +181,7 @@ def validate(params):
         )
     
     est = make_pipeline(transf, init_xbg_est(params))
-    return cv_test(est, n_folds=params['n_folds'], n_rows=params.get('n_rows'))
+    return cv_test(est, n_folds=params['n_folds'])
 
 
 def test_validate():
@@ -190,8 +190,8 @@ def test_validate():
         "max_depth": 9,
         "min_child_weight": 6,
         "gamma": 0,
-        "subsample": 0.7,
-        "colsample_bytree": 0.7,
+        "subsample": 0.1,
+        "colsample_bytree": 0.2,
         "category_encoding": "empytical_bayes",
         'num_rounds': 10,
         'n_folds': 3,
