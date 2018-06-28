@@ -64,7 +64,7 @@ def cv_test(est, n_folds, n_rows=None):
         X=features_t,
         y=target,
         cv=n_folds,
-        verbose=1)
+        verbose=0)
 
     return {'ROC-AUC-mean': scores.mean(), 'ROC-AUC-std': scores.std()}
 
@@ -89,15 +89,17 @@ def submission(est):
 
     res_df = pd.DataFrame({'y': y_pred}, index=df_test.index)
     res_df.to_csv('results.csv', index_label='ID')
+
     
 def hyperparam_objective(params):
     params['max_depth'] = int(params['max_depth'])
     return validate(params)['ROC-AUC-mean']
     
+    
 def hyperopt():
     import hyperopt as hpo
 
-    space = {
+    space = init_params({
         'max_depth': hpo.hp.quniform('max_depth', 5, 20, 1),
         'min_child_weight': hpo.hp.quniform('min_child_weight', 1, 20, 1),
         'gamma': hpo.hp.quniform('gamma', 0, 10, 1),
@@ -105,10 +107,9 @@ def hyperopt():
         "subsample": 0.7,
         "colsample_bytree": 0.7,
         'validation-type': 'cv',
-        'n_folds': 8,
         'category_encoding': 'onehot',
         'hkz_threshold': 49
-    }
+    })
 
     best = hpo.fmin(hyperparam_objective, space, algo=hpo.tpe.suggest, max_evals=100)
     print(best)
@@ -119,6 +120,30 @@ def eval_accuracy(preds, dtrain):
     idx = np.argmax(preds, axis=1)
     res = accuracy_score(labels, idx)
     return 'accuracy', -res
+
+
+def init_xbg_est(params):
+    keys = {
+        'eta',
+        'num_rounds',
+        'max_depth',
+        'min_child_weight',
+        'gamma',
+        'subsample',
+        'colsample_bytree'
+    }
+    
+    xgb_params = {
+        "objective": "multi:softprob",
+        "num_class": 7,
+        "scale_pos_weight": 1,
+        "silent": 0,
+        "verbose": 10,
+        "eval_func": eval_accuracy,
+        **{k: v for k, v in params.items() if k in keys},
+    }
+    
+    return xgb.XGBoostClassifier(**xgb_params)
 
 
 def validate(params):
@@ -156,29 +181,7 @@ def validate(params):
             Imputer(strategy='median'),
         )
     
-    keys = {
-        'eta',
-        'num_rounds',
-        'max_depth',
-        'min_child_weight',
-        'gamma',
-        'subsample',
-        'colsample_bytree'
-    }
-    
-    xgb_params = {k: v for k, v in params.items() if k in keys}
-    
-    xgb_params_all = {
-        "objective": "multi:softprob",
-        "num_class": 7,
-        "scale_pos_weight": 1,
-        "silent": 0,
-        "verbose": 10,
-        "eval_func": eval_accuracy,
-        **xgb_params,
-    }
-    
-    est = make_pipeline(transf, xgb.XGBoostClassifier(**xgb_params_all))
+    est = make_pipeline(transf, init_xbg_est(params))
     return cv_test(est, n_folds=params['n_folds'], n_rows=params.get('n_rows'))
 
 
@@ -192,6 +195,6 @@ def test_validate():
         "colsample_bytree": 0.7,
         "category_encoding": "empytical_bayes",
         'num_rounds': 10,
-        'n_fodls': 3
+        'n_folds': 3,
     }
     print(validate(params))
