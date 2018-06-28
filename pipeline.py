@@ -196,4 +196,4 @@ def test_validate():
         'num_rounds': 10,
         'n_folds': 3,
     }
-    print(validate(params))
+    print(validate(init_params(params)))
