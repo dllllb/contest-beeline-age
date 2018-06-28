@@ -31,6 +31,7 @@ def update_model_stats(stats_file, params, results):
 def run_experiment(evaluator, params, stats_file):    
     import time
     
+    params = init_params(params)
     start = time.time()
     scores = evaluator(params)
     exec_time = time.time() - start
@@ -146,9 +147,7 @@ def init_xbg_est(params):
     return xgb.XGBoostClassifier(**xgb_params)
 
 
-def validate(params):
-    params = init_params(params)
-    
+def validate(params):    
     category_encoding = params['category_encoding']
     
     if category_encoding == 'onehot':
