@@ -65,9 +65,10 @@ def cv_test(est, n_folds):
         X=features_t,
         y=target,
         cv=n_folds,
+        scoring='accuracy',
         verbose=0)
 
-    return {'ROC-AUC-mean': scores.mean(), 'ROC-AUC-std': scores.std()}
+    return {'accuracy-mean': scores.mean(), 'accuracy-std': scores.std()}
 
 
 def submission(est):
@@ -170,7 +171,7 @@ def validate(params):
         )
     elif category_encoding == 'empytical_bayes':
         transf = make_pipeline(
-            tr.empirical_bayes_encoder(),
+            tr.multi_class_empirical_bayes_encoder(),
             Imputer(strategy='median'),
         )
     elif category_encoding == 'target_share':
