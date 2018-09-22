@@ -180,6 +180,8 @@ def validate(params):
             tr.multi_class_target_share_encoder(size_threshold=size_threshold),
             Imputer(strategy='median'),
         )
+    else:
+        raise AttributeError(f'unknown cetegory endcoding method: {category_encoding}')
     
     est = make_pipeline(transf, init_xgb_est(params))
     return cv_test(est, n_folds=params['n_folds'])
