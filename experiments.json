@@ -27,51 +27,5 @@
         "validation_type": "cv",
         "n_folds": 8,
         "category_encoding": "count"
-    },
-    {
-        "accuracy-mean": 0.753899536611,
-        "accuracy-std": 0.0042606233231,
-        "eta": 0.001,
-        "num_rounds": 10000,
-        "max_depth": 9,
-        "min_child_weight": 6,
-        "gamma": 0,
-        "subsample": 0.7,
-        "colsample_bytree": 0.7,
-        "validation_type": "cv",
-        "n_folds": 8,
-        "category_encoding": "target_share_hkz",
-        "hkz_top": 20
-    },
-    {
-        "accuracy-mean": 0.7407190861094108,
-        "accuracy-std": 0.006672093040968181,
-        "eta": 0.001,
-        "num_rounds": 10000,
-        "max_depth": 9,
-        "min_child_weight": 6,
-        "gamma": 0,
-        "subsample": 0.7,
-        "colsample_bytree": 0.7,
-        "validation_type": "cv",
-        "n_folds": 8,
-        "category_encoding": "target_share",
-        "target_share_size_threshold": 100
-    },
-    {
-        "accuracy-mean": 0.7408800495312204,
-        "accuracy-std": 0.005740962053341066,
-        "exec-time-sec": 851.4436149597168,
-        "validation-type": "cv",
-        "n_folds": 8,
-        "num_rounds": 10000,
-        "eta": 0.001,
-        "max_depth": 9,
-        "min_child_weight": 6,
-        "gamma": 0,
-        "subsample": 0.7,
-        "colsample_bytree": 0.7,
-        "validation_type": "cv",
-        "category_encoding": "empytical_bayes"
     }
 ]

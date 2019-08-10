@@ -2,14 +2,14 @@ import pandas as pd
 import numpy as np
 from sklearn.metrics import accuracy_score
 
-from sklearn.model_selection import cross_val_score
+from sklearn.model_selection import cross_val_score, train_test_split
 from sklearn.feature_extraction import DictVectorizer
 from sklearn.pipeline import make_pipeline
 
-from sklearn.preprocessing.imputation import Imputer
+from sklearn.impute import SimpleImputer
+from xgboost import XGBClassifier
 
-import ds_tools.dstools.ml.transformers as tr
-import ds_tools.dstools.ml.xgboost_tools as xgb
+from encoders import high_cardinality_zeroing, df2dict, count_encoder
 
 
 def update_model_stats(stats_file, params, results):
@@ -127,7 +127,7 @@ def eval_accuracy(preds, dtrain):
 def init_xgb_est(params):
     keys = {
         'eta',
-        'num_rounds',
+        'n_estimators',
         'max_depth',
         'min_child_weight',
         'gamma',
@@ -137,15 +137,22 @@ def init_xgb_est(params):
     
     xgb_params = {
         "objective": "multi:softprob",
-        "num_class": 7,
         "scale_pos_weight": 1,
-        "silent": 0,
-        "verbose": 10,
-        "eval_func": eval_accuracy,
         **{k: v for k, v in params.items() if k in keys},
     }
+
+    class XGBC(XGBClassifier):
+        def fit(self, x, y, **kwargs):
+            f_train, f_val, t_train, t_val = train_test_split(x, y, test_size=.05)
+            super().fit(
+                f_train,
+                t_train,
+                eval_set=[(f_val, t_val)],
+                eval_metric=eval_accuracy,
+                early_stopping_rounds=50,
+                verbose=10)
     
-    return xgb.XGBoostClassifier(**xgb_params)
+    return XGBC(**xgb_params)
 
 
 def validate(params):    
@@ -153,32 +160,15 @@ def validate(params):
     
     if category_encoding == 'onehot':
         transf = make_pipeline(
-            tr.high_cardinality_zeroing(params['hkz_threshold']),
-            tr.df2dict(),
+            high_cardinality_zeroing(params['hkz_threshold']),
+            df2dict(),
             DictVectorizer(sparse=False),
-            Imputer(strategy='median'),
+            SimpleImputer(strategy='median'),
         )
     elif category_encoding == 'count':
         transf = make_pipeline(
-            tr.count_encoder(),
-            Imputer(strategy='median'),
-        )
-    elif category_encoding == 'target_share_hkz':
-        transf = make_pipeline(
-            tr.high_cardinality_zeroing(top=params['hkz_top']),
-            tr.multi_class_target_share_encoder(size_threshold=1),
-            Imputer(strategy='median'),
-        )
-    elif category_encoding == 'empytical_bayes':
-        transf = make_pipeline(
-            tr.multi_class_empirical_bayes_encoder(),
-            Imputer(strategy='median'),
-        )
-    elif category_encoding == 'target_share':
-        size_threshold=params['target_share_size_threshold']
-        transf = make_pipeline(
-            tr.multi_class_target_share_encoder(size_threshold=size_threshold),
-            Imputer(strategy='median'),
+            count_encoder(),
+            SimpleImputer(strategy='median'),
         )
     else:
         raise AttributeError(f'unknown cetegory endcoding method: {category_encoding}')
@@ -195,7 +185,7 @@ def test_validate():
         "gamma": 0,
         "subsample": 0.1,
         "colsample_bytree": 0.2,
-        "category_encoding": "empytical_bayes",
+        "category_encoding": "count",
         'num_rounds': 10,
         'n_folds': 3,
     }
