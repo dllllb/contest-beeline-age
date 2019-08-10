@@ -126,7 +126,7 @@ def eval_accuracy(preds, dtrain):
 
 def init_xgb_est(params):
     keys = {
-        'eta',
+        'learning_rate',
         'n_estimators',
         'max_depth',
         'min_child_weight',
