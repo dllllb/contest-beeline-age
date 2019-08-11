@@ -2,8 +2,8 @@
     {
         "accuracy-mean": 0.753299206752,
         "accuracy-std": 0.00461122957968,
-        "eta": 0.001,
-        "num_rounds": 10000,
+        "learning_rate": 0.001,
+        "n_estimators": 10000,
         "max_depth": 9,
         "min_child_weight": 6,
         "gamma": 0,
@@ -17,8 +17,8 @@
     {
         "accuracy-mean": 0.751939373068,
         "accuracy-std": 0.00569865718706,
-        "eta": 0.001,
-        "num_rounds": 10000,
+        "learning_rate": 0.001,
+        "n_estimators": 10000,
         "max_depth": 9,
         "min_child_weight": 6,
         "gamma": 0,
