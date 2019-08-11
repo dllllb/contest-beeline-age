@@ -9,7 +9,7 @@ from sklearn.pipeline import make_pipeline
 from sklearn.impute import SimpleImputer
 from xgboost import XGBClassifier
 
-from encoders import high_cardinality_zeroing, df2dict, count_encoder
+from transformer import high_cardinality_zeroing, df2dict, count_encoder
 
 
 def update_model_stats(stats_file, params, results):
