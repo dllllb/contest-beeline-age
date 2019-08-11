@@ -7,9 +7,10 @@ from sklearn.feature_extraction import DictVectorizer
 from sklearn.pipeline import make_pipeline
 
 from sklearn.impute import SimpleImputer
+from sklearn.preprocessing import FunctionTransformer
 from xgboost import XGBClassifier
 
-from transformer import high_cardinality_zeroing, df2dict, count_encoder
+from transformer import high_cardinality_zeroing, count_encoder
 
 
 def update_model_stats(stats_file, params, results):
@@ -159,9 +160,12 @@ def validate(params):
     category_encoding = params['category_encoding']
     
     if category_encoding == 'onehot':
+        df2dict = FunctionTransformer(
+            lambda x: x.to_dict(orient='records'), validate=False)
+
         transf = make_pipeline(
             high_cardinality_zeroing(params['hkz_threshold']),
-            df2dict(),
+            df2dict,
             DictVectorizer(sparse=False),
             SimpleImputer(strategy='median'),
         )

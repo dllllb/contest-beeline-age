@@ -75,9 +75,3 @@ def build_count_encoder(column, __):
 
 def count_encoder(columns=None, n_jobs=1):
     return TargetCategoryEncoder(build_count_encoder, columns, n_jobs)
-
-
-def df2dict():
-    from sklearn.preprocessing import FunctionTransformer
-    return FunctionTransformer(
-        lambda x: x.to_dict(orient='records'), validate=False)
