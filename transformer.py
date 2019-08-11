@@ -5,12 +5,6 @@ from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.externals.joblib import Parallel, delayed
 
 
-def df2dict():
-    from sklearn.preprocessing import FunctionTransformer
-    return FunctionTransformer(
-        lambda x: x.to_dict(orient='records'), validate=False)
-
-
 class TargetCategoryEncoder(BaseEstimator, TransformerMixin):
     def __init__(self, builder, columns=None, n_jobs=1, true_label=None):
         self.vc = dict()
@@ -71,6 +65,7 @@ def high_cardinality_zeroing(threshold=1, top=10000, placeholder='zeroed', colum
 
     return TargetCategoryEncoder(buider, columns, n_jobs)
 
+
 def build_count_encoder(column, __):
     entries = column.replace(np.nan, 'nan').value_counts()
     entries = entries.sort_values(ascending=False).index
@@ -80,3 +75,9 @@ def build_count_encoder(column, __):
 
 def count_encoder(columns=None, n_jobs=1):
     return TargetCategoryEncoder(build_count_encoder, columns, n_jobs)
+
+
+def df2dict():
+    from sklearn.preprocessing import FunctionTransformer
+    return FunctionTransformer(
+        lambda x: x.to_dict(orient='records'), validate=False)
