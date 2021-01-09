@@ -1,3 +1,3 @@
 # Discussions
 
-- Как я победил в конкурсе BigData от Beeline, @nurumaik, habr.com
+Как я победил в конкурсе BigData от Beeline, @nurumaik, habr.com
